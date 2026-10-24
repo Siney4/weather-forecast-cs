@@ -4,5 +4,5 @@ namespace WeatherForecastApp.Interfaces;
 
 public interface IWeatherService
 {
-    Task<List<DayForecast>> GetForecastAsync();
+    public Task<List<DayForecast>> GetForecastAsync();
 }

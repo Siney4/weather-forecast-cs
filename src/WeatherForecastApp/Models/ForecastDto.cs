@@ -8,22 +8,22 @@ public class ForecastDto
 public class DailyDto
 {
     public DateTime Date { get; set; }
-    public TempDto Temperature { get; set; } = new();
-    public PartDto Day { get; set; } = new();
+    public TemperatureDto Temperature { get; set; } = new();
+    public SkyConditions Day { get; set; } = new();
 }
 
-public class TempDto
-{
-    public ValueDto Minimum { get; set; } = new();
-    public ValueDto Maximum { get; set; } = new();
+public class TemperatureDto
+{ 
+    public TemperatureValueDto Minimum { get; set; } = new();
+    public TemperatureValueDto Maximum { get; set; } = new();
 }
 
-public class ValueDto
+public class TemperatureValueDto
 {
     public double Value { get; set; }
 }
 
-public class PartDto
+public class SkyConditions
 {
     public string IconPhrase { get; set; } = "";
 }
