@@ -1,9 +1,17 @@
 ﻿using WeatherForecastApp.Interfaces;
 using WeatherForecastApp.Services;
+using WeatherForecastApp.UI;
+using Microsoft.Extensions.Configuration;
 
 using Microsoft.Extensions.DependencyInjection;
 
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", optional: false)
+    .Build();
+
 var services = new ServiceCollection();
+
+services.AddSingleton<IConfiguration>(configuration);
 
 services.AddHttpClient("AccuWeather", client =>
 {
