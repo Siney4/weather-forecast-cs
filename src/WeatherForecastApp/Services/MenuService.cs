@@ -52,6 +52,10 @@ public class MenuService
         {
             PrintForecast(forecast);
         }
+        
+        _historyService.AddEntry(
+            "Прогноз на неделю",
+            forecasts.Take(7).ToList());
     }
 
     public void ShowNextDayForecast(List<DayForecast> forecasts)
@@ -70,6 +74,10 @@ public class MenuService
         }
 
         PrintForecast(forecast);
+        
+        _historyService.AddEntry(
+            "Прогноз на завтра",
+            new List<DayForecast> { forecast });
     }
 
     public void ShowForecastForDay(List<DayForecast> forecasts)
@@ -82,12 +90,18 @@ public class MenuService
         if (forecast == null)
         {
             Console.WriteLine("Прогноз на эту дату недоступен.");
-            Console.WriteLine("Проверьте, входит ли дата в полученный от API диапазон.");
+            Console.WriteLine("не входит в API диапазон.");
             return;
         }
 
         Console.WriteLine($"\nПрогноз на {date.ToString(DateFormat, CultureInfo.InvariantCulture)}:");
         PrintForecast(forecast);
+        
+        _historyService.AddEntry(
+            "Прогноз на день",
+            new List<DayForecast> { forecast },
+            date,
+            date);
     }
 
     public void ShowForecastForPeriod(List<DayForecast> forecasts)
@@ -112,7 +126,7 @@ public class MenuService
         if (availableForecasts.Count == 0)
         {
             Console.WriteLine("На указанный период прогноз недоступен.");
-            Console.WriteLine("Проверьте даты: API возвращает прогноз максимум на 15 дней.");
+            Console.WriteLine("API возвращает прогноз максимум на 15 дней.");
             return;
         }
 
@@ -133,6 +147,12 @@ public class MenuService
             Console.WriteLine(
                 $"\nДля {missingDays} дн. прогноз отсутствует в полученном списке.");
         }
+        
+        _historyService.AddEntry(
+            "Прогноз на период",
+            availableForecasts,
+            startDate,
+            endDate);
     }
     
     public void ShowHistory()

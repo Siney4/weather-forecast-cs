@@ -1,30 +1,29 @@
 using System.Net.Http.Json;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using WeatherForecastApp.Interfaces;
 using WeatherForecastApp.Models;
+using WeatherForecastApp.Options;
 
 namespace WeatherForecastApp.Services;
 
 public class WeatherService : IWeatherService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IConfiguration _configuration;
+    private readonly AccuWeatherOptions _options;
 
     public WeatherService(
         IHttpClientFactory httpClientFactory,
-        IConfiguration configuration)
+        IOptions<AccuWeatherOptions> options)
     {
         _httpClientFactory = httpClientFactory;
-        _configuration = configuration;
+        _options = options.Value;
     }
 
-    public async Task<List<DayForecast>> GetForecastAsync()
+    public async Task<List<DayForecast>> GetForecastAsync(string locationKey)
     {
         var client = _httpClientFactory.CreateClient("AccuWeather");
         
-        var apiKey = _configuration["AccuWeather:ApiKey"];
-
-        var url = $"forecasts/v1/daily/15day/349727?apikey={apiKey}&metric=true&language=ru-ru";
+        var url = $"forecasts/v1/daily/15day/{locationKey}?apikey={_options.ApiKey}&metric=true&language=ru-ru";
 
         try
         {
