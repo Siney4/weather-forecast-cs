@@ -10,6 +10,10 @@ var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false)
     .Build();
 
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", optional: false)
+    .Build();
+
 var services = new ServiceCollection();
 
 services.Configure<AccuWeatherOptions>(
