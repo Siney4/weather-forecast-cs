@@ -1,9 +1,14 @@
-﻿using WeatherForecastApp.Interfaces;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using WeatherForecastApp.Interfaces;
+using WeatherForecastApp.Options;
 using WeatherForecastApp.Services;
 using WeatherForecastApp.UI;
-using Microsoft.Extensions.Configuration;
 
-using Microsoft.Extensions.DependencyInjection;
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json", optional: false)
+    .Build();
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false)
@@ -11,18 +16,45 @@ var configuration = new ConfigurationBuilder()
 
 var services = new ServiceCollection();
 
-services.AddSingleton<IConfiguration>(configuration);
+services.Configure<AccuWeatherOptions>(
+    configuration.GetSection(AccuWeatherOptions.SectionName));
+services.AddSingleton<IValidateOptions<AccuWeatherOptions>, AccuWeatherOptionsValidator>();
 
-services.AddHttpClient("AccuWeather", client =>
+services.AddHttpClient("AccuWeather", (serviceProvider, client) =>
 {
-    client.BaseAddress = new Uri("https://dataservice.accuweather.com/");
+    var options = serviceProvider
+        .GetRequiredService<IOptions<AccuWeatherOptions>>()
+        .Value;
+
+    client.BaseAddress = new Uri(options.BaseUrl);
 });
+
 services.AddTransient<IWeatherService, WeatherService>();
+services.AddTransient<ILocationService, LocationService>();
+services.AddTransient<LocationMenuService>();
+services.AddTransient<MenuService>();
+services.AddTransient<ConsoleMenu>();
+services.AddSingleton<ForecastHistoryService>();
+services.AddSingleton<LocationSettingsService>();
 
 var provider = services.BuildServiceProvider();
 
-var weather = provider.GetRequiredService<IWeatherService>();
+try
+{
+    _ = provider.GetRequiredService<IOptions<AccuWeatherOptions>>().Value;
+}
+catch (OptionsValidationException ex)
+{
+    Console.WriteLine("Ошибка в настройках appsettings.json:");
 
-var forecasts = await weather.GetForecastAsync();
-foreach (var f in forecasts)
-    Console.WriteLine($"{f.Date}: {f.MinimumTemperature}..{f.MaximumTemperature}, {f.SkyConditions}");
+    foreach (var failure in ex.Failures)
+    {
+        Console.WriteLine($"- {failure}");
+    }
+
+    return;
+}
+
+var menu = provider.GetRequiredService<ConsoleMenu>();
+
+await menu.RunAsync();
